@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1078567969920",
+    "project_id": "quarx-2a99a",
+    "storage_bucket": "quarx-2a99a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1078567969920:android:1edb52240c614329c9b265",
+        "android_client_info": {
+          "package_name": "com.iquarix.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLQfSVjJbbPQ0LLmonpVJNfbgIIqtLhbE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

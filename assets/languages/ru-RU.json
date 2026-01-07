@@ -1,0 +1,15 @@
+{
+  "submit": "Подтвердить",
+  "phone_number": "Номер телефона",
+  "phone_required": "Номер телефона обязателен",
+  "invalid_phone": "Неправильный номер телефона",
+  "request_not_processed": "Запрос не обработан",
+  "login": "Вход",
+  "enter_code_send_to_your_number": "Введите код, отправленный на ваш номер",
+  "otp": {
+    "sent_prefix": "Проверочный код отправили на номер",
+    "sent_suffix": ""
+  },
+  "incorrect_confirmation_code": "Неправильный код подтверждения",
+  "resend_code": "Отправить код повторно"
+}
