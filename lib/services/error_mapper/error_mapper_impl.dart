@@ -34,8 +34,8 @@ class ErrorMapperImpl implements ErrorMapper {
       return error;
     }
 
-    return const ServerFailure(
-      message: 'Nomaʼlum xatolik',
+    return ServerFailure(
+      message: LocaleKeys.errorUnknownError.tr(),
       statusCode: -1,
       label: 'unknown_error',
     );
@@ -91,6 +91,6 @@ class ErrorMapperImpl implements ErrorMapper {
     if (data is Map && data['message'] != null) {
       return data['message'].toString();
     }
-    return LocaleKeys.requestNotProcessed.tr();
+    return LocaleKeys.authErrorRequestNotProcessed.tr();
   }
 }

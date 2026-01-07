@@ -15,7 +15,7 @@ class OtpCubit extends Cubit<OtpState> {
 
     result.fold(
       (failure) {
-        emit(const OtpState.showErrorMessage("Invalid code"));
+        emit(OtpState.showErrorMessage(failure));
       },
       (data) {
         emit(OtpState.success(request, data));
@@ -23,19 +23,25 @@ class OtpCubit extends Cubit<OtpState> {
     );
   }
 
-  void resendCodeButtonPres(DataMap request) async {
-    // final newRequest = request..code = null;
-    //
-    // emit(const OtpState.showLoading());
-    // final result = await _loginPhoneNumUsecase(params: newRequest);
-    // emit(const OtpState.dismissLoading());
+  Future<void> resendCodeButtonPres(DataMap request) async {
+    emit(const OtpState.resendLoading());
+
+    // Simulate API call with 3 second delay
+    await Future.delayed(const Duration(seconds: 3));
+
+    // Reset to initial state and restart timer
+    emit(const OtpState.initial());
+    emit(const OtpState.restartTimer());
+
+    // TODO: Uncomment and implement when API is ready
+    // final result = await _repository.resendOtp();
     // result.fold(
-    //       (failure) {
-    //     emit(OtpState.showErrorMessage(failure.message));
+    //   (failure) {
+    //     emit(OtpState.showErrorMessage(failure));
     //   },
-    //       (data) {
+    //   (data) {
+    //     emit(const OtpState.initial());
     //     emit(const OtpState.restartTimer());
-    //     emit(OtpState.updateInitialArgs(request.copyWith(code: data['code'])));
     //   },
     // );
   }

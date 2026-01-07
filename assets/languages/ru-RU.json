@@ -1,15 +1,25 @@
 {
-  "submit": "Подтвердить",
-  "phone_number": "Номер телефона",
-  "phone_required": "Номер телефона обязателен",
-  "invalid_phone": "Неправильный номер телефона",
-  "request_not_processed": "Запрос не обработан",
-  "login": "Вход",
-  "enter_code_send_to_your_number": "Введите код, отправленный на ваш номер",
-  "otp": {
-    "sent_prefix": "Проверочный код отправили на номер",
-    "sent_suffix": ""
+  "auth": {
+    "phone_auth": {
+      "title": "Добро пожаловать!",
+      "description": "Введите, пожалуйста, номер телефона",
+      "input_label": "Номер телефона",
+      "input_hint_text": "Введите номер телефона",
+      "phone_required": "Номер телефона обязателен",
+      "submit_button_text": "Продолжить"
+    },
+    "otp": {
+      "title": "Верификация",
+      "description": "Мы отправили код на ваш номер телефона",
+      "resend_code": "Отправить снова"
+    },
+    "error": {
+      "invalid_phone": "Неправильный номер телефона",
+      "request_not_processed": "Запрос не обработан",
+      "otp_code_error": "Код введен неверно, попробуйте ввести еще раз"
+    }
   },
-  "incorrect_confirmation_code": "Неправильный код подтверждения",
-  "resend_code": "Отправить код повторно"
+  "error": {
+    "unknown_error": "Неизвестная ошибка"
+  }
 }
