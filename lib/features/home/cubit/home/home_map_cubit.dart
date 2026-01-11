@@ -1,49 +1,70 @@
 import 'dart:async';
 import 'dart:developer' as dev;
 
-import 'package:iquarix/core/helper/enums.dart';
-import 'package:iquarix/features/home/data/repository/home_repository.dart';
-import 'package:iquarix/iquarx_app.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:iquarix/core/helper/enums.dart';
+import 'package:iquarix/iquarx_app.dart';
 import 'package:iquarix/services/location/location_permission_service.dart';
 import 'package:iquarix/services/location/location_service.dart';
 
 part 'home_map_state.dart';
 
+/// Business logic for home map screen with real-time location tracking
 class HomeMapCubit extends Cubit<HomeMapState> {
-  HomeMapCubit(this._permissionService, this._locationService, this._repository)
-    : super(HomeMapState.initial());
+  HomeMapCubit(
+    this._permissionService,
+    this._locationService,
+  ) : super(HomeMapState.initial());
+
+  static const Duration _locationUpdateInterval = Duration(seconds: 15);
+  static const String _logName = 'HomeMapCubit';
 
   final LocationPermissionService _permissionService;
   final LocationService _locationService;
-  final HomeRepository _repository;
 
   StreamSubscription<Position>? _positionSubscription;
-  Timer? _periodicLogger;
-  DateTime? _lastLogTime;
+  Timer? _periodicTimer;
 
+  /// Initializes location tracking with permission check
   Future<void> startTracking() async {
-    final access = await _permissionService.ensurePermission();
-    emit(state.copyWith(access: access));
+    final accessStatus = await _permissionService.ensurePermission();
+    emit(state.copyWith(access: accessStatus));
 
-    if (access != LocationAccessStatus.granted) return;
+    if (accessStatus != LocationAccessStatus.granted) {
+      dev.log(
+        'Location permission not granted: $accessStatus',
+        name: _logName,
+      );
+      return;
+    }
 
-    _positionSubscription?.cancel();
-    _positionSubscription = _locationService.getPositionStream().listen(
-      _handlePositionUpdate,
-      onError: (error) {
-        dev.log('Location stream error: $error', name: 'HomeMapCubit');
-      },
-    );
-
-    _startPeriodicLogging();
+    await _initializeLocationStream();
+    _startPeriodicLocationLogging();
   }
 
-  void _handlePositionUpdate(Position pos) {
+  /// Sets up continuous location updates stream
+  Future<void> _initializeLocationStream() async {
+    await _positionSubscription?.cancel();
+
+    _positionSubscription = _locationService.getPositionStream().listen(
+      _onLocationUpdate,
+      onError: (error, stackTrace) {
+        dev.log(
+          'Location stream error',
+          name: _logName,
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+  }
+
+  /// Handles incoming location updates from stream
+  void _onLocationUpdate(Position position) {
     emit(
       state.copyWith(
-        latitude: pos.latitude,
-        longitude: pos.longitude,
+        latitude: position.latitude,
+        longitude: position.longitude,
         isInitial: false,
         access: LocationAccessStatus.granted,
         shouldMoveCamera: state.isInitial,
@@ -51,37 +72,67 @@ class HomeMapCubit extends Cubit<HomeMapState> {
     );
   }
 
-  void _startPeriodicLogging() {
-    _periodicLogger?.cancel();
-    _periodicLogger = Timer.periodic(
-      const Duration(seconds: 15),
+  /// Starts periodic location logging timer
+  void _startPeriodicLocationLogging() {
+    _periodicTimer?.cancel();
+    _periodicTimer = Timer.periodic(
+      _locationUpdateInterval,
       (_) => _logCurrentLocation(),
     );
   }
 
+  /// Logs current location coordinates periodically
   void _logCurrentLocation() {
     if (state.isInitial) return;
 
-    final now = DateTime.now();
-    _lastLogTime = now;
-    _repository.sendLocation(state.latitude, state.longitude);
+    final timestamp = DateTime.now();
+    final locationString = _formatLocationString(
+      state.latitude,
+      state.longitude,
+    );
+
+    dev.log(
+      'Location update: $locationString',
+      name: _logName,
+    );
+
+    // TODO: Uncomment when backend is ready
+    // await _repository.sendLocation(state.latitude, state.longitude);
+
     emit(
       state.copyWith(
-        lastLoggedLocation: '${state.latitude}, ${state.longitude}',
-        lastLogTime: now,
+        lastLoggedLocation: locationString,
+        lastLogTime: timestamp,
       ),
     );
   }
 
+  /// Formats location coordinates for display
+  String _formatLocationString(double lat, double lng) {
+    return 'Lat: ${lat.toStringAsFixed(6)}, Lng: ${lng.toStringAsFixed(6)}';
+  }
+
+  /// Resets camera movement flag after animation completes
   void cameraMovedToLocation() {
     if (state.shouldMoveCamera) {
       emit(state.copyWith(shouldMoveCamera: false));
     }
   }
 
+  /// Opens app settings for location permission
+  Future<void> openAppSettings() async {
+    await _permissionService.openAppSettings();
+  }
+
+  /// Stops all location tracking and cleans up resources
   void stopTracking() {
     _positionSubscription?.cancel();
-    _periodicLogger?.cancel();
+    _positionSubscription = null;
+
+    _periodicTimer?.cancel();
+    _periodicTimer = null;
+
+    dev.log('Location tracking stopped', name: _logName);
   }
 
   @override

@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:iquarix/core/helper/enums.dart';
-import 'package:iquarix/features/home/cubit/home/home_map_cubit.dart';
 import 'package:iquarix/iquarx_app.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
@@ -11,194 +8,185 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => sl<HomeMapCubit>()..startTracking(),
-      child: const Scaffold(body: _HomePageForm()),
+      child: const Scaffold(body: _HomePageContent()),
     );
   }
 }
 
-class _HomePageForm extends StatefulWidget {
-  const _HomePageForm();
+class _HomePageContent extends StatefulWidget {
+  const _HomePageContent();
 
   @override
-  State<_HomePageForm> createState() => _HomePageFormState();
+  State<_HomePageContent> createState() => _HomePageContentState();
 }
 
-class _HomePageFormState extends State<_HomePageForm> {
+class _HomePageContentState extends State<_HomePageContent>
+    with WidgetsBindingObserver {
+  static const double _defaultZoom = 16.0;
+  static const double _zoomStep = 1.0;
+  static const double _cameraDuration = 1.0;
+  static const Duration _snackBarDuration = Duration(seconds: 3);
+
   YandexMapController? _mapController;
+  double _currentZoom = _defaultZoom;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     context.read<HomeMapCubit>().stopTracking();
     super.dispose();
   }
 
-  void _moveToCurrentLocation(double lat, double lng) {
-    _mapController?.moveCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: Point(latitude: lat, longitude: lng),
-          zoom: 16,
-        ),
-      ),
-      animation: const MapAnimation(type: MapAnimationType.smooth, duration: 1),
-    );
-    context.read<HomeMapCubit>().cameraMovedToLocation();
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      context.read<HomeMapCubit>().startTracking();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        // Camera harakatlantirish uchun listener
-        BlocListener<HomeMapCubit, HomeMapState>(
-          listenWhen: (prev, curr) => curr.shouldMoveCamera,
-          listener: (context, state) {
-            if (!state.isInitial) {
-              _moveToCurrentLocation(state.latitude, state.longitude);
-            }
-          },
-        ),
-        // Har 15 soniyada location log qilish uchun
-        BlocListener<HomeMapCubit, HomeMapState>(
-          listenWhen: (prev, curr) =>
-              curr.lastLogTime != null && curr.lastLogTime != prev.lastLogTime,
-          listener: (context, state) {
-            if (state.lastLoggedLocation != null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Current Location: ${state.lastLoggedLocation}',
-                  ),
-                  duration: const Duration(seconds: 3),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            }
-          },
-        ),
+        _buildCameraAnimationListener(),
+        _buildLocationUpdateListener(),
       ],
-      child: Column(
+      child: Stack(
         children: [
-          // Permission xatolari uchun persistent banner
-          BlocBuilder<HomeMapCubit, HomeMapState>(
-            buildWhen: (prev, curr) => prev.access != curr.access,
-            builder: (context, state) {
-              return _PermissionBanner(accessStatus: state.access);
-            },
-          ),
-          // Xarita
-          Expanded(
-            child: BlocBuilder<HomeMapCubit, HomeMapState>(
-              buildWhen: (prev, curr) =>
-                  prev.latitude != curr.latitude ||
-                  prev.longitude != curr.longitude ||
-                  prev.isInitial != curr.isInitial,
-              builder: (context, state) {
-                return YandexMap(
-                  onMapCreated: (controller) {
-                    _mapController = controller;
-                    // Agar location allaqachon mavjud bo'lsa, darhol harakat
-                    if (!state.isInitial) {
-                      _moveToCurrentLocation(state.latitude, state.longitude);
-                    }
-                  },
-                  mapObjects: [
-                    if (!state.isInitial) ...[
-                      // Asosiy nuqta (blue dot)
-                      CircleMapObject(
-                        mapId: const MapObjectId('current_location_dot'),
-                        circle: Circle(
-                          center: Point(
-                            latitude: state.latitude,
-                            longitude: state.longitude,
-                          ),
-                          radius: 8, // 8 metr radius
-                        ),
-                        strokeColor: Colors.white,
-                        strokeWidth: 2,
-                        fillColor: const Color(0xFF4285F4), // Google Maps blue
-                      ),
-                      // Atrofdagi aylana (accuracy circle)
-                      CircleMapObject(
-                        mapId: const MapObjectId('current_location_accuracy'),
-                        circle: Circle(
-                          center: Point(
-                            latitude: state.latitude,
-                            longitude: state.longitude,
-                          ),
-                          radius: 30, // accuracy radiusi
-                        ),
-                        strokeColor: const Color(0x404285F4),
-                        strokeWidth: 1,
-                        fillColor: const Color(0x204285F4),
-                      ),
-                    ],
-                  ],
-                );
-              },
-            ),
+          Column(children: [_buildPermissionBanner(), _buildMap()]),
+          ProfileButton(onTap: _onProfileTap),
+          MapControls(
+            onZoomIn: _onZoomIn,
+            onZoomOut: _onZoomOut,
+            onCurrentLocation: _onCurrentLocationTap,
           ),
         ],
       ),
     );
   }
-}
 
-// Alohida widget performance uchun
-class _PermissionBanner extends StatelessWidget {
-  final LocationAccessStatus accessStatus;
-
-  const _PermissionBanner({required this.accessStatus});
-
-  @override
-  Widget build(BuildContext context) {
-    if (accessStatus == LocationAccessStatus.granted) {
-      return const SizedBox.shrink();
-    }
-
-    final (message, color, action) = _getBannerContent(context);
-
-    return MaterialBanner(
-      content: Text(message, style: const TextStyle(color: Colors.white)),
-      backgroundColor: color,
-      leading: const Icon(Icons.warning_amber_rounded, color: Colors.white),
-      actions: [
-        if (action != null)
-          TextButton(
-            onPressed: action,
-            child: const Text(
-              'Sozlamalar',
-              style: TextStyle(color: Colors.white),
-            ),
-          )
-        else
-          TextButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
-            },
-            child: const Text('OK', style: TextStyle(color: Colors.white)),
-          ),
-      ],
+  BlocListener<HomeMapCubit, HomeMapState> _buildCameraAnimationListener() {
+    return BlocListener<HomeMapCubit, HomeMapState>(
+      listenWhen: (prev, curr) => curr.shouldMoveCamera,
+      listener: (context, state) {
+        if (!state.isInitial) {
+          _animateCameraToLocation(state.latitude, state.longitude);
+        }
+      },
     );
   }
 
-  (String, Color, VoidCallback?) _getBannerContent(BuildContext context) {
-    switch (accessStatus) {
-      case LocationAccessStatus.serviceDisabled:
-        return ("GPS o'chiq. Location service'ni yoqing.", Colors.orange, null);
-      case LocationAccessStatus.denied:
-        return ('Location ruxsati berilmadi.', Colors.red.shade700, null);
-      case LocationAccessStatus.deniedForever:
-        return (
-          'Location ruxsati butunlay bloklangan.',
-          Colors.red.shade900,
-          () {
-            // sl<LocationPermissionService>().openAppSettings();
-            // yoki cubit orqali
-          },
-        );
-      case LocationAccessStatus.granted:
-        return ('', Colors.transparent, null);
+  BlocListener<HomeMapCubit, HomeMapState> _buildLocationUpdateListener() {
+    return BlocListener<HomeMapCubit, HomeMapState>(
+      listenWhen: (prev, curr) =>
+          curr.lastLogTime != null && curr.lastLogTime != prev.lastLogTime,
+      listener: (context, state) {
+        if (state.lastLoggedLocation != null) {
+          _showLocationSnackBar(state.lastLoggedLocation!);
+        }
+      },
+    );
+  }
+
+  Widget _buildPermissionBanner() {
+    return BlocBuilder<HomeMapCubit, HomeMapState>(
+      buildWhen: (prev, curr) => prev.access != curr.access,
+      builder: (context, state) => PermissionBanner(accessStatus: state.access),
+    );
+  }
+
+  Widget _buildMap() {
+    return Expanded(
+      child: BlocBuilder<HomeMapCubit, HomeMapState>(
+        buildWhen: (prev, curr) =>
+            prev.latitude != curr.latitude ||
+            prev.longitude != curr.longitude ||
+            prev.isInitial != curr.isInitial,
+        builder: (context, state) {
+          return LocationMap(
+            latitude: state.latitude,
+            longitude: state.longitude,
+            isInitial: state.isInitial,
+            onMapCreated: (controller) {
+              _mapController = controller;
+              if (!state.isInitial) {
+                _animateCameraToLocation(state.latitude, state.longitude);
+              }
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  void _animateCameraToLocation(double latitude, double longitude) {
+    _mapController?.moveCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: Point(latitude: latitude, longitude: longitude),
+          zoom: _defaultZoom,
+        ),
+      ),
+      animation: const MapAnimation(
+        type: MapAnimationType.smooth,
+        duration: _cameraDuration,
+      ),
+    );
+    context.read<HomeMapCubit>().cameraMovedToLocation();
+  }
+
+  void _showLocationSnackBar(String locationText) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(locationText),
+        duration: _snackBarDuration,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _onProfileTap() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Profile page - coming soon'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _onZoomIn() {
+    _currentZoom += _zoomStep;
+    _mapController?.moveCamera(
+      CameraUpdate.zoomIn(),
+      animation: const MapAnimation(
+        type: MapAnimationType.smooth,
+        duration: 0.3,
+      ),
+    );
+  }
+
+  void _onZoomOut() {
+    _currentZoom -= _zoomStep;
+    _mapController?.moveCamera(
+      CameraUpdate.zoomOut(),
+      animation: const MapAnimation(
+        type: MapAnimationType.smooth,
+        duration: 0.3,
+      ),
+    );
+  }
+
+  void _onCurrentLocationTap() {
+    final state = context.read<HomeMapCubit>().state;
+    if (!state.isInitial) {
+      _animateCameraToLocation(state.latitude, state.longitude);
     }
   }
 }

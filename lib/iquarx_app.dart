@@ -54,3 +54,8 @@ export 'features/auth/otp/data/repository/otp_repository_impl.dart';
 export 'features/auth/otp/components/otp_code_input.dart';
 export 'features/auth/otp/otp_page.dart';
 export 'features/home/home_page.dart';
+export 'features/home/cubit/home/home_map_cubit.dart';
+export 'features/home/components/location_map.dart';
+export 'features/home/components/map_controls.dart';
+export 'features/home/components/profile_button.dart';
+export 'features/home/components/permission_banner.dart';
