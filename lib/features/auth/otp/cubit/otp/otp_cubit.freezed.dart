@@ -55,13 +55,14 @@ extension OtpStatePatterns on OtpState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _ShowLoading value)?  showLoading,TResult Function( _DismissLoading value)?  dismissLoading,TResult Function( _RestartTimer value)?  restartTimer,TResult Function( _StopTimer value)?  stopTimer,TResult Function( _InvalidCode value)?  invalidCode,TResult Function( _ShowErrorMessage value)?  showErrorMessage,TResult Function( _UpdateInitialArgs value)?  updateInitialArgs,TResult Function( _Success value)?  success,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _ShowLoading value)?  showLoading,TResult Function( _DismissLoading value)?  dismissLoading,TResult Function( _ResendLoading value)?  resendLoading,TResult Function( _RestartTimer value)?  restartTimer,TResult Function( _StopTimer value)?  stopTimer,TResult Function( _InvalidCode value)?  invalidCode,TResult Function( _ShowErrorMessage value)?  showErrorMessage,TResult Function( _UpdateInitialArgs value)?  updateInitialArgs,TResult Function( _Success value)?  success,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _ShowLoading() when showLoading != null:
 return showLoading(_that);case _DismissLoading() when dismissLoading != null:
-return dismissLoading(_that);case _RestartTimer() when restartTimer != null:
+return dismissLoading(_that);case _ResendLoading() when resendLoading != null:
+return resendLoading(_that);case _RestartTimer() when restartTimer != null:
 return restartTimer(_that);case _StopTimer() when stopTimer != null:
 return stopTimer(_that);case _InvalidCode() when invalidCode != null:
 return invalidCode(_that);case _ShowErrorMessage() when showErrorMessage != null:
@@ -85,13 +86,14 @@ return success(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _ShowLoading value)  showLoading,required TResult Function( _DismissLoading value)  dismissLoading,required TResult Function( _RestartTimer value)  restartTimer,required TResult Function( _StopTimer value)  stopTimer,required TResult Function( _InvalidCode value)  invalidCode,required TResult Function( _ShowErrorMessage value)  showErrorMessage,required TResult Function( _UpdateInitialArgs value)  updateInitialArgs,required TResult Function( _Success value)  success,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _ShowLoading value)  showLoading,required TResult Function( _DismissLoading value)  dismissLoading,required TResult Function( _ResendLoading value)  resendLoading,required TResult Function( _RestartTimer value)  restartTimer,required TResult Function( _StopTimer value)  stopTimer,required TResult Function( _InvalidCode value)  invalidCode,required TResult Function( _ShowErrorMessage value)  showErrorMessage,required TResult Function( _UpdateInitialArgs value)  updateInitialArgs,required TResult Function( _Success value)  success,}){
 final _that = this;
 switch (_that) {
 case _Initial():
 return initial(_that);case _ShowLoading():
 return showLoading(_that);case _DismissLoading():
-return dismissLoading(_that);case _RestartTimer():
+return dismissLoading(_that);case _ResendLoading():
+return resendLoading(_that);case _RestartTimer():
 return restartTimer(_that);case _StopTimer():
 return stopTimer(_that);case _InvalidCode():
 return invalidCode(_that);case _ShowErrorMessage():
@@ -114,13 +116,14 @@ return success(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _ShowLoading value)?  showLoading,TResult? Function( _DismissLoading value)?  dismissLoading,TResult? Function( _RestartTimer value)?  restartTimer,TResult? Function( _StopTimer value)?  stopTimer,TResult? Function( _InvalidCode value)?  invalidCode,TResult? Function( _ShowErrorMessage value)?  showErrorMessage,TResult? Function( _UpdateInitialArgs value)?  updateInitialArgs,TResult? Function( _Success value)?  success,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _ShowLoading value)?  showLoading,TResult? Function( _DismissLoading value)?  dismissLoading,TResult? Function( _ResendLoading value)?  resendLoading,TResult? Function( _RestartTimer value)?  restartTimer,TResult? Function( _StopTimer value)?  stopTimer,TResult? Function( _InvalidCode value)?  invalidCode,TResult? Function( _ShowErrorMessage value)?  showErrorMessage,TResult? Function( _UpdateInitialArgs value)?  updateInitialArgs,TResult? Function( _Success value)?  success,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _ShowLoading() when showLoading != null:
 return showLoading(_that);case _DismissLoading() when dismissLoading != null:
-return dismissLoading(_that);case _RestartTimer() when restartTimer != null:
+return dismissLoading(_that);case _ResendLoading() when resendLoading != null:
+return resendLoading(_that);case _RestartTimer() when restartTimer != null:
 return restartTimer(_that);case _StopTimer() when stopTimer != null:
 return stopTimer(_that);case _InvalidCode() when invalidCode != null:
 return invalidCode(_that);case _ShowErrorMessage() when showErrorMessage != null:
@@ -143,16 +146,17 @@ return success(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  showLoading,TResult Function()?  dismissLoading,TResult Function()?  restartTimer,TResult Function()?  stopTimer,TResult Function( bool value)?  invalidCode,TResult Function( String message)?  showErrorMessage,TResult Function( DataMap args)?  updateInitialArgs,TResult Function( DataMap request,  DataMap data)?  success,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  showLoading,TResult Function()?  dismissLoading,TResult Function()?  resendLoading,TResult Function()?  restartTimer,TResult Function()?  stopTimer,TResult Function( bool value)?  invalidCode,TResult Function( Failure failure)?  showErrorMessage,TResult Function( DataMap args)?  updateInitialArgs,TResult Function( DataMap request,  DataMap data)?  success,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _ShowLoading() when showLoading != null:
 return showLoading();case _DismissLoading() when dismissLoading != null:
-return dismissLoading();case _RestartTimer() when restartTimer != null:
+return dismissLoading();case _ResendLoading() when resendLoading != null:
+return resendLoading();case _RestartTimer() when restartTimer != null:
 return restartTimer();case _StopTimer() when stopTimer != null:
 return stopTimer();case _InvalidCode() when invalidCode != null:
 return invalidCode(_that.value);case _ShowErrorMessage() when showErrorMessage != null:
-return showErrorMessage(_that.message);case _UpdateInitialArgs() when updateInitialArgs != null:
+return showErrorMessage(_that.failure);case _UpdateInitialArgs() when updateInitialArgs != null:
 return updateInitialArgs(_that.args);case _Success() when success != null:
 return success(_that.request,_that.data);case _:
   return orElse();
@@ -172,16 +176,17 @@ return success(_that.request,_that.data);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  showLoading,required TResult Function()  dismissLoading,required TResult Function()  restartTimer,required TResult Function()  stopTimer,required TResult Function( bool value)  invalidCode,required TResult Function( String message)  showErrorMessage,required TResult Function( DataMap args)  updateInitialArgs,required TResult Function( DataMap request,  DataMap data)  success,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  showLoading,required TResult Function()  dismissLoading,required TResult Function()  resendLoading,required TResult Function()  restartTimer,required TResult Function()  stopTimer,required TResult Function( bool value)  invalidCode,required TResult Function( Failure failure)  showErrorMessage,required TResult Function( DataMap args)  updateInitialArgs,required TResult Function( DataMap request,  DataMap data)  success,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _ShowLoading():
 return showLoading();case _DismissLoading():
-return dismissLoading();case _RestartTimer():
+return dismissLoading();case _ResendLoading():
+return resendLoading();case _RestartTimer():
 return restartTimer();case _StopTimer():
 return stopTimer();case _InvalidCode():
 return invalidCode(_that.value);case _ShowErrorMessage():
-return showErrorMessage(_that.message);case _UpdateInitialArgs():
+return showErrorMessage(_that.failure);case _UpdateInitialArgs():
 return updateInitialArgs(_that.args);case _Success():
 return success(_that.request,_that.data);case _:
   throw StateError('Unexpected subclass');
@@ -200,16 +205,17 @@ return success(_that.request,_that.data);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  showLoading,TResult? Function()?  dismissLoading,TResult? Function()?  restartTimer,TResult? Function()?  stopTimer,TResult? Function( bool value)?  invalidCode,TResult? Function( String message)?  showErrorMessage,TResult? Function( DataMap args)?  updateInitialArgs,TResult? Function( DataMap request,  DataMap data)?  success,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  showLoading,TResult? Function()?  dismissLoading,TResult? Function()?  resendLoading,TResult? Function()?  restartTimer,TResult? Function()?  stopTimer,TResult? Function( bool value)?  invalidCode,TResult? Function( Failure failure)?  showErrorMessage,TResult? Function( DataMap args)?  updateInitialArgs,TResult? Function( DataMap request,  DataMap data)?  success,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _ShowLoading() when showLoading != null:
 return showLoading();case _DismissLoading() when dismissLoading != null:
-return dismissLoading();case _RestartTimer() when restartTimer != null:
+return dismissLoading();case _ResendLoading() when resendLoading != null:
+return resendLoading();case _RestartTimer() when restartTimer != null:
 return restartTimer();case _StopTimer() when stopTimer != null:
 return stopTimer();case _InvalidCode() when invalidCode != null:
 return invalidCode(_that.value);case _ShowErrorMessage() when showErrorMessage != null:
-return showErrorMessage(_that.message);case _UpdateInitialArgs() when updateInitialArgs != null:
+return showErrorMessage(_that.failure);case _UpdateInitialArgs() when updateInitialArgs != null:
 return updateInitialArgs(_that.args);case _Success() when success != null:
 return success(_that.request,_that.data);case _:
   return null;
@@ -307,6 +313,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'OtpState.dismissLoading()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _ResendLoading implements OtpState {
+  const _ResendLoading();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ResendLoading);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'OtpState.resendLoading()';
 }
 
 
@@ -449,10 +487,10 @@ as bool,
 
 
 class _ShowErrorMessage implements OtpState {
-  const _ShowErrorMessage(this.message);
+  const _ShowErrorMessage(this.failure);
   
 
- final  String message;
+ final  Failure failure;
 
 /// Create a copy of OtpState
 /// with the given fields replaced by the non-null parameter values.
@@ -464,16 +502,16 @@ _$ShowErrorMessageCopyWith<_ShowErrorMessage> get copyWith => __$ShowErrorMessag
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ShowErrorMessage&&(identical(other.message, message) || other.message == message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ShowErrorMessage&&(identical(other.failure, failure) || other.failure == failure));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,message);
+int get hashCode => Object.hash(runtimeType,failure);
 
 @override
 String toString() {
-  return 'OtpState.showErrorMessage(message: $message)';
+  return 'OtpState.showErrorMessage(failure: $failure)';
 }
 
 
@@ -484,7 +522,7 @@ abstract mixin class _$ShowErrorMessageCopyWith<$Res> implements $OtpStateCopyWi
   factory _$ShowErrorMessageCopyWith(_ShowErrorMessage value, $Res Function(_ShowErrorMessage) _then) = __$ShowErrorMessageCopyWithImpl;
 @useResult
 $Res call({
- String message
+ Failure failure
 });
 
 
@@ -501,10 +539,10 @@ class __$ShowErrorMessageCopyWithImpl<$Res>
 
 /// Create a copy of OtpState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? failure = null,}) {
   return _then(_ShowErrorMessage(
-null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String,
+null == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
+as Failure,
   ));
 }
 

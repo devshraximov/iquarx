@@ -15,9 +15,12 @@ class OtpRepositoryImpl implements OtpRepository {
       if (otp == '123456') {
         return Right({'success': true, 'message': 'Success'});
       } else {
-        throw DioException(
-          error: Response(statusCode: 401, requestOptions: RequestOptions()),
-          requestOptions: RequestOptions(),
+        return Left(
+          const ServerFailure(
+            message: "Invalid code",
+            statusCode: 401,
+            label: 'invalid_code',
+          ),
         );
       }
     } catch (error) {

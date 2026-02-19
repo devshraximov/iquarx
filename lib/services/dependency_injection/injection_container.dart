@@ -54,7 +54,6 @@ Future<void> setupRouter() async {
     () => HomeMapCubit(
       sl<LocationPermissionService>(),
       sl<LocationService>(),
-      sl<HomeRepository>(),
     ),
   );
 }

@@ -1,7 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
-
 import 'package:iquarix/iquarx_app.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 class PhoneAuthPage extends StatelessWidget {
   const PhoneAuthPage({super.key});
@@ -11,8 +9,8 @@ class PhoneAuthPage extends StatelessWidget {
     return BlocProvider<PhoneAuthCubit>(
       create: (context) => sl<PhoneAuthCubit>(),
       child: const Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: _PhoneAuthPageForm(),
+        resizeToAvoidBottomInset: true,
+        body: SafeArea(child: _PhoneAuthPageForm()),
       ),
     );
   }
@@ -30,11 +28,6 @@ class _PhoneAuthPageFormState extends State<_PhoneAuthPageForm> {
   late final TextEditingController _phoneController;
   late final FocusNode _phoneFocus;
   late final ValueNotifier<bool> _isPhoneValidNotifier;
-
-  static final _phoneMaskFormatter = MaskTextInputFormatter(
-    mask: '## ### ## ##',
-    filter: {'#': RegExp(r'[0-9]')},
-  );
 
   static const int _minPhoneLength = 9;
   static const String _countryCode = '+998';
@@ -60,8 +53,9 @@ class _PhoneAuthPageFormState extends State<_PhoneAuthPageForm> {
   }
 
   void _onPhoneChanged() {
-    final isValid =
-        _phoneController.text.replaceAll(' ', '').length >= _minPhoneLength;
+    final normalizedPhone = _phoneController.text.replaceAll(' ', '');
+    final isValid = normalizedPhone.length >= _minPhoneLength;
+
     if (_isPhoneValidNotifier.value != isValid) {
       _isPhoneValidNotifier.value = isValid;
     }
@@ -74,17 +68,22 @@ class _PhoneAuthPageFormState extends State<_PhoneAuthPageForm> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_phoneFocus.hasFocus) {
+      _phoneFocus.unfocus();
+    }
+
     final phone = _getNormalizedPhone();
     context.read<PhoneAuthCubit>().submitPhone('$_countryCode$phone');
   }
 
   String? _validatePhone(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return LocaleKeys.phoneRequired.tr();
+      return LocaleKeys.authPhoneAuthPhoneRequired.tr();
     }
 
-    if (value.replaceAll(' ', '').length < _minPhoneLength) {
-      return LocaleKeys.invalidPhone.tr();
+    final normalizedValue = value.replaceAll(' ', '');
+    if (normalizedValue.length < _minPhoneLength) {
+      return LocaleKeys.authErrorInvalidPhone.tr();
     }
 
     return null;
@@ -96,12 +95,14 @@ class _PhoneAuthPageFormState extends State<_PhoneAuthPageForm> {
       location: RouterKeys.otp,
       extra: {'phoneNum': _getNormalizedPhone()},
     );
+    // Reset state to initial after navigation to prevent loading state from persisting
+    context.read<PhoneAuthCubit>().completeShowError();
   }
 
   void _handlePhoneAuthError(BuildContext context, String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+    );
     context.read<PhoneAuthCubit>().completeShowError();
   }
 
@@ -126,18 +127,24 @@ class _PhoneAuthPageFormState extends State<_PhoneAuthPageForm> {
         return AbsorbPointer(
           absorbing: isLoading,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.all(20),
             child: Form(
               key: _formKey,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _PhoneInputField(
+                  const SizedBox(height: 80),
+                  _buildPageHeader(context),
+                  const SizedBox(height: 48),
+                  CustomPhoneInput(
                     controller: _phoneController,
                     focusNode: _phoneFocus,
+                    labelText: LocaleKeys.authPhoneAuthInputLabel.tr(),
+                    hintText: LocaleKeys.authPhoneAuthInputHintText.tr(),
                     validator: _validatePhone,
+                    onChanged: (_) => _onPhoneChanged(),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
                   _SubmitButton(
                     isLoadingNotifier: ValueNotifier<bool>(isLoading),
                     isPhoneValidNotifier: _isPhoneValidNotifier,
@@ -151,71 +158,23 @@ class _PhoneAuthPageFormState extends State<_PhoneAuthPageForm> {
       },
     );
   }
-}
 
-class _PhoneInputField extends StatelessWidget {
-  const _PhoneInputField({
-    required this.controller,
-    required this.focusNode,
-    required this.validator,
-  });
-
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final String? Function(String?) validator;
-
-  static final _phoneMaskFormatter = MaskTextInputFormatter(
-    mask: '## ### ## ##',
-    filter: {'#': RegExp(r'[0-9]')},
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      focusNode: focusNode,
-      keyboardType: TextInputType.phone,
-      inputFormatters: [_phoneMaskFormatter],
-      decoration: InputDecoration(
-        hintText: LocaleKeys.phoneNumber.tr(),
-        prefixIcon: const _PhonePrefixIcon(),
-        suffixIcon: _ClearButtonWrapper(controller: controller),
-        border: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
+  Widget _buildPageHeader(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          LocaleKeys.authPhoneAuthTitle.tr(),
+          style: AppTextStyles.largeTitleSemiBold.copyWith(
+            color: AppColors.cx1E1E1E,
+          ),
         ),
-      ),
-      validator: validator,
-    );
-  }
-}
-
-class _PhonePrefixIcon extends StatelessWidget {
-  const _PhonePrefixIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [SizedBox(width: 16), Text('+998')],
-    );
-  }
-}
-
-class _ClearButtonWrapper extends StatelessWidget {
-  const _ClearButtonWrapper({required this.controller});
-
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<TextEditingValue>(
-      valueListenable: controller,
-      builder: (context, value, child) {
-        if (value.text.isEmpty) {
-          return const SizedBox.shrink();
-        }
-        return ClearButton(onTap: controller.clear);
-      },
+        const SizedBox(height: 8),
+        Text(
+          LocaleKeys.authPhoneAuthDescription.tr(),
+          style: AppTextStyles.bodyRegular.copyWith(color: AppColors.cx1E1E1E),
+        ),
+      ],
     );
   }
 }
@@ -224,12 +183,12 @@ class _SubmitButton extends StatelessWidget {
   const _SubmitButton({
     required this.isLoadingNotifier,
     required this.isPhoneValidNotifier,
-    required this.onPressed,
+    this.onPressed,
   });
 
   final ValueNotifier<bool> isLoadingNotifier;
   final ValueNotifier<bool> isPhoneValidNotifier;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -240,12 +199,51 @@ class _SubmitButton extends StatelessWidget {
           valueListenable: isLoadingNotifier,
           builder: (context, isLoading, child) {
             return SizedBox(
+              height: 50,
               width: double.maxFinite,
               child: ElevatedButton(
                 onPressed: !isPhoneValid || isLoading ? null : onPressed,
+                style: ButtonStyle(
+                  elevation: const MaterialStatePropertyAll(0),
+                  shape: const MaterialStatePropertyAll(StadiumBorder()),
+                  backgroundColor: MaterialStateProperty.resolveWith((states) {
+                    if (isLoading) {
+                      return AppColors.mainColor;
+                    }
+                    if (states.contains(MaterialState.disabled)) {
+                      return AppColors.cxF3F4F6;
+                    }
+                    if (states.contains(MaterialState.pressed)) {
+                      return AppColors.mainColor.withOpacity(0.85);
+                    }
+                    if (states.contains(MaterialState.hovered)) {
+                      return AppColors.mainColor.withOpacity(0.92);
+                    }
+                    return AppColors.mainColor;
+                  }),
+                  overlayColor: MaterialStateProperty.resolveWith((states) {
+                    if (states.contains(MaterialState.pressed)) {
+                      return AppColors.cx575757.withOpacity(0.12);
+                    }
+                    if (states.contains(MaterialState.hovered)) {
+                      if (!isPhoneValid) {
+                        return null;
+                      }
+                      return AppColors.cx575757.withOpacity(0.08);
+                    }
+                    return null;
+                  }),
+                ),
                 child: isLoading
                     ? const _LoadingIndicator()
-                    : Text(LocaleKeys.submit.tr()),
+                    : Text(
+                        LocaleKeys.authPhoneAuthSubmitButtonText.tr(),
+                        style: AppTextStyles.controlInputLabel1.copyWith(
+                          color: !isPhoneValid
+                              ? AppColors.cx575757
+                              : Colors.white,
+                        ),
+                      ),
               ),
             );
           },
@@ -263,7 +261,7 @@ class _LoadingIndicator extends StatelessWidget {
     return const SizedBox(
       height: 20,
       width: 20,
-      child: CircularProgressIndicator(strokeWidth: 2),
+      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
     );
   }
 }

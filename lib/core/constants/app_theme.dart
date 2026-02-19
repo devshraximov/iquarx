@@ -1,3 +1,4 @@
+import 'package:iquarix/core/constants/app_fonts.dart';
 import 'package:iquarix/iquarx_app.dart';
 
 abstract final class AppTheme {
@@ -6,13 +7,15 @@ abstract final class AppTheme {
   static ThemeData light = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
-    colorSchemeSeed: Colors.deepPurple,
+    fontFamily: AppFonts.archivo,
+    scaffoldBackgroundColor: Colors.white,
   );
 
   static ThemeData dark = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
-    colorSchemeSeed: Colors.deepPurple,
+    fontFamily: AppFonts.archivo,
+    scaffoldBackgroundColor: Colors.black,
   );
 
   static AdaptiveThemeMode initial = AdaptiveThemeMode.light;
