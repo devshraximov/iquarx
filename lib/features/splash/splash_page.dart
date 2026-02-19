@@ -10,9 +10,9 @@ class SplashPage extends StatelessWidget {
       child: BlocListener<SplashBloc, SplashState>(
         listener: (context, state) {
           if (state is GoToAuthState) {
-            sl<AppRouter>().go(context, location: RouterKeys.phoneAuth);
+            sl<AppRouter>().go(context, location: RouterKeys.qrScanner);
           } else if (state is GoToHomeState) {
-            sl<AppRouter>().go(context, location: RouterKeys.home);
+            sl<AppRouter>().go(context, location: RouterKeys.qrScanner);
           }
         },
         child: Scaffold(

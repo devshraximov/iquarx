@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:iquarix/features/qr_scanner/qr_scanner_page.dart';
 import 'package:iquarix/iquarx_app.dart';
 
 final appRoutes = <GoRoute>[
@@ -18,4 +19,8 @@ final appRoutes = <GoRoute>[
     },
   ),
   GoRoute(path: RouterKeys.home, builder: (context, state) => const HomePage()),
+  GoRoute(
+    path: RouterKeys.qrScanner,
+    builder: (context, state) => const QrScannerPage(),
+  ),
 ];
